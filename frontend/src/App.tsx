@@ -57,6 +57,12 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export const App: React.FC = () => {
+  React.useEffect(() => {
+    if (window.location.pathname !== '/' && window.location.pathname !== '') {
+      window.history.replaceState(null, '', '/' + (window.location.hash || '#/login'));
+    }
+  }, []);
+
   return (
     <ToastProvider>
       <AuthProvider>
