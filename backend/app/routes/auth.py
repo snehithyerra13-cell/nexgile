@@ -2,11 +2,47 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.auth import User, UserRole, Organization
-from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
-from app.utils.security import verify_password, create_access_token, get_current_user
+from app.schemas.auth import LoginRequest, UserCreate, TokenResponse, UserResponse
+from app.utils.security import verify_password, get_password_hash, create_access_token, get_current_user
 from app.utils.audit import log_audit_event
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
+@router.post("/register", response_model=UserResponse)
+def register(payload: UserCreate, db: Session = Depends(get_db)):
+    """Register a new user account with specified role and password."""
+    email_clean = payload.email.strip().lower()
+    existing = db.query(User).filter(User.email == email_clean).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"An account with email '{email_clean}' already exists."
+        )
+
+    new_user = User(
+        organization_id=payload.organization_id or 1,
+        email=email_clean,
+        hashed_password=get_password_hash(payload.password),
+        full_name=payload.full_name.strip(),
+        role=payload.role,
+        title=payload.title,
+        supplier_id=payload.supplier_id,
+        is_active=True
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    log_audit_event(
+        db=db,
+        user_email=email_clean,
+        action="CREATE",
+        resource="User",
+        resource_id=str(new_user.id),
+        new_value=f"Registered new user {new_user.full_name} with role {new_user.role.value}"
+    )
+
+    return UserResponse.model_validate(new_user)
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):

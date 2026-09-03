@@ -80,6 +80,8 @@ export const api = {
   auth: {
     login: (credentials: { email: string; password: string }) =>
       apiClient.post<{ access_token: string; token_type: string; user: User }>('/api/auth/login', credentials),
+    register: (userData: { email: string; password: string; full_name: string; role?: string; title?: string }) =>
+      apiClient.post<User>('/api/auth/register', userData),
     getMe: () => apiClient.get<User>('/api/auth/me'),
     getDemoUsers: () => apiClient.get<any[]>('/api/auth/demo-users'),
   },

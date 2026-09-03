@@ -6,6 +6,15 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+    role: UserRole = UserRole.SUSTAINABILITY_MANAGER
+    title: Optional[str] = None
+    organization_id: Optional[int] = 1
+    supplier_id: Optional[int] = None
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
