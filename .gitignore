@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# SQLite & local DBs
+*.db-journal
+*.sqlite3
+
+# Node & Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+dist-ssr/
+*.local
+
+# Environment variables
+.env.local
+.env.*.local
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
