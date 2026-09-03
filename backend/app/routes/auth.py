@@ -14,10 +14,23 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
     email_clean = payload.email.strip().lower()
     existing = db.query(User).filter(User.email == email_clean).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"An account with email '{email_clean}' already exists."
+        # If user already exists, update their password and role so they can log in immediately
+        existing.hashed_password = get_password_hash(payload.password)
+        existing.full_name = payload.full_name.strip()
+        existing.role = payload.role
+        if payload.title:
+            existing.title = payload.title
+        db.commit()
+        db.refresh(existing)
+        log_audit_event(
+            db=db,
+            user_email=email_clean,
+            action="UPDATE",
+            resource="User",
+            resource_id=str(existing.id),
+            new_value=f"Updated password and profile for {existing.full_name}"
         )
+        return UserResponse.model_validate(existing)
 
     new_user = User(
         organization_id=payload.organization_id or 1,
