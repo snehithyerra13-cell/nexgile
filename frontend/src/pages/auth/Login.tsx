@@ -70,19 +70,29 @@ export const Login: React.FC = () => {
       });
       showToast('success', 'Account Created', `Welcome ${regName}! Signing you in...`);
       setIsRegisterOpen(false);
-      // Automatically log them in with the new credentials
       const success = await login(regEmail, regPass);
       if (success) {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      showToast('error', 'Registration Failed', err.response?.data?.detail || 'Unable to create account');
+      // If user is already registered in the database, attempt instant login!
+      const loginSuccess = await login(regEmail, regPass);
+      if (loginSuccess) {
+        showToast('success', 'Signed In', `Welcome back ${regName || regEmail}!`);
+        setIsRegisterOpen(false);
+        navigate('/dashboard');
+      } else {
+        showToast('info', 'Account Already Registered', 'Your account is already active! Please sign in directly.');
+        setEmail(regEmail);
+        setIsRegisterOpen(false);
+      }
     } finally {
       setRegistering(false);
     }
   };
 
   const demoRoles = [
+    { role: 'Snehith Yerra', email: 'snehithyerra13@gmail.com', pass: 'mypassword123', desc: 'Your registered personal account' },
     { role: 'Admin', email: 'admin@decarbx.com', pass: 'admin123', desc: 'Full system control & config' },
     { role: 'Sustainability Manager', email: 'manager@decarbx.com', pass: 'manager123', desc: 'Emissions, reduction projects & ESG' },
     { role: 'Carbon Accountant', email: 'accountant@decarbx.com', pass: 'accountant123', desc: 'Activity ledgers, factors & calculations' },
