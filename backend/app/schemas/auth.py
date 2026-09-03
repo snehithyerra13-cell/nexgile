@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from app.models.auth import UserRole
 
 class LoginRequest(BaseModel):
@@ -7,7 +7,7 @@ class LoginRequest(BaseModel):
     password: str
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     full_name: str
     role: UserRole = UserRole.SUSTAINABILITY_MANAGER
